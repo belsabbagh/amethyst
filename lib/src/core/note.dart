@@ -15,7 +15,6 @@ class Parser {
 
   static Set<Link> parseLinks(String body) {
     return linksExp.allMatches(body).map((m) {
-      // split by | to get alias
       String str = m.group(1) ?? '';
       List<String> parts = str.split('|');
       return Link(
