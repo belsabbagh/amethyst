@@ -2,7 +2,6 @@ import 'package:amethyst/src/core/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 
 class MyApp extends StatefulWidget {
@@ -16,18 +15,42 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _selectedDirectory = './';
+  String? _selectedDirectory; // Make selected directory nullable
 
   Future<void> _pickDirectory(BuildContext context) async {
     String? newDirectory = await FilePicker.platform.getDirectoryPath();
 
     setState(() {
-      _selectedDirectory = newDirectory ?? _selectedDirectory;
+      _selectedDirectory = newDirectory;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget body;
+    if (_selectedDirectory != null) {
+      body = DummyPage(directoryPath: _selectedDirectory!);
+    } else {
+      body = Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () async {
+                await _pickDirectory(context);
+              },
+              child: const Text('Open Folder Picker'),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Selected folder: $_selectedDirectory',
+              style: const TextStyle(fontSize: 16),
+            )
+          ],
+        ),
+      );
+    }
+
     return MaterialApp(
       restorationScopeId: 'app',
       localizationsDelegates: const [
@@ -43,30 +66,23 @@ class _MyAppState extends State<MyApp> {
           AppLocalizations.of(context)!.appTitle,
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Select Folder'),
+          title: const Text('Select Folder'),
         ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton(
-                onPressed: () async {
-                  // Open folder picker
-                  await _pickDirectory(context);
-                },
-                child: Text('Open Folder Picker'),
-              ),
-              SizedBox(height: 20),
-              _selectedDirectory != null
-                  ? Text(
-                      'Selected folder: $_selectedDirectory',
-                      style: TextStyle(fontSize: 16),
-                    )
-                  : Container(),
-            ],
-          ),
-        ),
+        body: body,
       ),
+    );
+  }
+}
+
+class DummyPage extends StatelessWidget {
+  final String directoryPath;
+
+  const DummyPage({Key? key, required this.directoryPath}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('Selected Directory: $directoryPath'),
     );
   }
 }
