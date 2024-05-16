@@ -35,17 +35,8 @@ class _MyAppState extends State<MyApp> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () async {
-                await _pickDirectory(context);
-              },
-              child: const Text('Open Folder Picker'),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Selected folder: $_selectedDirectory',
-              style: const TextStyle(fontSize: 16),
-            )
+            ElevatedButton(onPressed: () => _pickDirectory(context)
+            , child: const Text('Pick Directory')),
           ],
         ),
       );
