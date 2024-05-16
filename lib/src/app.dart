@@ -1,3 +1,5 @@
+import 'package:amethyst/src/core/indexer.dart';
+import 'package:amethyst/src/core/models/vault.dart';
 import 'package:amethyst/src/core/settings/settings_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -67,13 +69,15 @@ class _MyAppState extends State<MyApp> {
 
 class DummyPage extends StatelessWidget {
   final String directoryPath;
-
-  const DummyPage({Key? key, required this.directoryPath}) : super(key: key);
+  late final IndexService indexService = IndexService(vault: Vault(path: directoryPath));
+  DummyPage({Key? key, required this.directoryPath}) : super(key: key) {
+    indexService.index();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Selected Directory: $directoryPath'),
+      child: Text('Selected Directory: $directoryPath. Count: ${indexService.countNotes()}'),
     );
   }
 }

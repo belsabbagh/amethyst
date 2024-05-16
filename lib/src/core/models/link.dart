@@ -1,6 +1,6 @@
-class Link {
+class NoteLink {
   String path;
   String alias;
 
-  Link({required this.path, required this.alias});
+  NoteLink({required this.path, required this.alias});
 }

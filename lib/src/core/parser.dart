@@ -6,11 +6,11 @@ class Parser {
   final RegExp tagsExp = RegExp(r'#(\w+)');
   final RegExp linksExp = RegExp(r'\[\[(\w+)\]\]');
 
-  Set<Link> parseLinks(String body) {
+  Set<NoteLink> parseLinks(String body) {
     return linksExp.allMatches(body).map((m) {
       String str = m.group(1) ?? '';
       List<String> parts = str.split('|');
-      return Link(
+      return NoteLink(
           path: parts[0], alias: parts.length > 1 ? parts[1] : parts[0]);
     }).toSet();
   }
@@ -20,7 +20,7 @@ class Parser {
   }
 
   Map<String, dynamic> parseProps(String frontMatter) {
-    YamlMap yaml = loadYaml(frontMatter);
+    YamlMap yaml = loadYaml(frontMatter) ?? YamlMap();
     return Map.from(yaml);
   }
 }

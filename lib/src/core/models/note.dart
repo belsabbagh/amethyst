@@ -10,14 +10,14 @@ class Note {
   );
   static Note fromString(String note) {
     Set<String> tags = _parser.parseTags(note);
-    Set<Link> links = _parser.parseLinks(note);
+    Set<NoteLink> links = _parser.parseLinks(note);
     Match? match = _parser.frontMatterExp.firstMatch(note);
     String frontMatter = match?.group(1) ?? '';
     String body = match?.group(2) ?? note;
     Map<String, dynamic> props = _parser.parseProps(frontMatter);
     // add tags from props
     if (props.containsKey('tags')) {
-      tags.addAll(Set.from(props['tags']));
+      tags.addAll(Set.from(props['tags'] ?? []));
       props.remove('tags');
     }
     return Note(
@@ -31,7 +31,7 @@ class Note {
   Set<String> tags;
   String body;
   Map<String, dynamic> props;
-  Set<Link> links;
+  Set<NoteLink> links;
 
   Note({
     this.tags = const {},
@@ -44,7 +44,7 @@ class Note {
     Set<String>? tags,
     String? body,
     Map<String, dynamic>? props,
-    Set<Link>? links,
+    Set<NoteLink>? links,
   }) {
     return Note(
       tags: tags ?? this.tags,
