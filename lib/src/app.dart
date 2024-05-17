@@ -94,37 +94,37 @@ class _SearchViewState extends State<SearchView> {
   @override
   Widget build(BuildContext context) {
     return Column(
-          children: [
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                hintText: 'Enter search query',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    _performSearch(_controller.text);
-                  },
-                ),
-              ),
-              onChanged: (query) {
-                _performSearch(query);
+      children: [
+        TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: 'Enter search query',
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                _performSearch(_controller.text);
               },
             ),
-            SizedBox(height: 20),
-            Expanded(
-              child: _results.isEmpty
-                  ? Center(child: Text('No results'))
-                  : ListView.builder(
-                      itemCount: _results.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          title: Text(_results[index]),
-                        );
-                      },
-                    ),
-            ),
-          ],
-        );
+          ),
+          onChanged: (query) {
+            _performSearch(query);
+          },
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: _controller.text.isEmpty || _results.isEmpty
+              ? const Center(child: Text('No results'))
+              : ListView.builder(
+                  itemCount: _results.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(_results[index]),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
   }
 }
 
@@ -136,15 +136,15 @@ class TagView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: indexService.tags.length,
-        itemBuilder: (context, index) {
-          String key = indexService.tags.keys.elementAt(index);
-          return ListTile(
-            title: Text(key),
-            subtitle: Text("Count ${indexService.tags[key]!.length}"),
-          );
-        },
-      ) ;
+      itemCount: indexService.tags.length,
+      itemBuilder: (context, index) {
+        String key = indexService.tags.keys.elementAt(index);
+        return ListTile(
+          title: Text(key),
+          subtitle: Text("Count ${indexService.tags[key]!.length}"),
+        );
+      },
+    );
   }
 }
 
@@ -159,7 +159,7 @@ class LeftDrawer extends StatelessWidget {
         length: 3, // Number of tabs
         child: Column(
           children: <Widget>[
-            TabBar(
+            const TabBar(
               tabs: [
                 Tab(icon: Icon(Icons.folder), text: 'Files'),
                 Tab(icon: Icon(Icons.search), text: 'Search'),
@@ -169,8 +169,8 @@ class LeftDrawer extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child: Text('Home Content')),
-                  Center(child: SearchView()),
+                  const Center(child: Text('Home Content')),
+                  const Center(child: SearchView()),
                   Center(child: TagView(indexService: indexService)),
                 ],
               ),
