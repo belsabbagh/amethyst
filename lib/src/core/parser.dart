@@ -3,7 +3,7 @@ import 'package:yaml/yaml.dart';
 
 class Parser {
   final RegExp frontMatterExp = RegExp(r'---\n([\s\S]+?)---\n(.+)');
-  final RegExp tagsExp = RegExp(r'#(\w+)');
+  final RegExp tagsExp = RegExp(r'\W(\#[a-zA-Z_\-\/]+\b)(?!;)');
   final RegExp linksExp = RegExp(r'\[\[(\w+)\]\]');
 
   Set<NoteLink> parseLinks(String body) {
@@ -16,7 +16,7 @@ class Parser {
   }
 
   Set<String> parseTags(String frontMatter) {
-    return tagsExp.allMatches(frontMatter).map((m) => m.group(1) ?? '').toSet();
+    return tagsExp.allMatches(frontMatter).map((m) => (m.group(1) ?? '').trim()).toSet();
   }
 
   Map<String, dynamic> parseProps(String frontMatter) {

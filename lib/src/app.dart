@@ -77,7 +77,7 @@ class DummyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Selected Directory: $directoryPath. Count: ${indexService.countNotes()}'),
+      child: Text('Selected Directory: $directoryPath. Count: ${indexService.countNotes()}. Tags: ${indexService.tags.length}'),
     );
   }
 }
