@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:amethyst/src/core/models/link.dart';
 import 'package:amethyst/src/core/models/note.dart';
-import 'package:amethyst/src/core/models/tag.dart';
 import 'package:amethyst/src/core/models/vault.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,7 +11,7 @@ class IndexService {
   Map<String, String> path2Id = {};
   Map<String, List<String>> outlinks = {};
   Map<String, List<String>> inlinks = {};
-  Map<Tag, Set<String>> tags = {};
+  Map<String, Set<String>> tags = {};
   IndexService({required this.vault});
 
   IndexService index() {
@@ -32,7 +31,7 @@ class IndexService {
       String text = File(path).readAsStringSync();
       Note note = Note.fromString(text);
       for (String tag in note.tags) {
-        tags.putIfAbsent(Tag(name: tag), () => {}).add(id);
+        tags.putIfAbsent(tag, () => {}).add(id);
       }
       for (NoteLink link in note.links.toList()) {
         String linkPath = vault.absolutePath(link.path);
