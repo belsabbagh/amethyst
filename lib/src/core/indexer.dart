@@ -22,19 +22,19 @@ class IndexService {
 
     for (String path in vault.notes) {
       String id = const Uuid().v8();
-      id2Path[id] = path;
+      id2Path[id] = path.replaceFirst(vault.path + Platform.pathSeparator, '');
       path2Id[path] = id;
     }
     
     for (String id in id2Path.keys) {
       String path = id2Path[id]!;
-      String text = File(path).readAsStringSync();
+      String text = File(vault.absolutePath(path)).readAsStringSync();
       Note note = Note.fromString(text);
       for (String tag in note.tags) {
         tags.putIfAbsent(tag, () => {}).add(id);
       }
       for (NoteLink link in note.links.toList()) {
-        String linkPath = vault.absolutePath(link.path);
+        String linkPath = link.path;
         String linkId = path2Id.putIfAbsent(linkPath, () => const Uuid().v8());
         outlinks.putIfAbsent(id, () => []).add(linkId);
         inlinks.putIfAbsent(linkId, () => []).add(id);
