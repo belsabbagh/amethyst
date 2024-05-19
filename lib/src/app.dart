@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Future<void> _pickDirectory(BuildContext context) async {
-    String? newDirectory = "/home/belal/projects/nadapedia"; // await FilePicker.platform.getDirectoryPath();
+    String? newDirectory = await FilePicker.platform.getDirectoryPath();
 
     if (newDirectory == null) {
       return;
