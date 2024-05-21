@@ -9,8 +9,9 @@ class NoteEditor extends StatefulWidget {
 }
 
 class _NoteEditorState extends State<NoteEditor> {
-  bool _isEditing = true;
+  bool _isEditing = false;
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _fileNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -21,10 +22,18 @@ class _NoteEditorState extends State<NoteEditor> {
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
-      children: [
+        children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              Expanded(
+                child: TextField(
+                  controller: _fileNameController,
+                  decoration: InputDecoration(
+                    hintText: 'Enter file name',
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                ),
+              ),
               IconButton(
                 icon: Icon(_isEditing ? Icons.visibility : Icons.edit),
                 onPressed: () {
@@ -34,12 +43,12 @@ class _NoteEditorState extends State<NoteEditor> {
                 },
               ),
             ],
-        ),
-        Expanded(
-          child: _isEditing ? _buildEditingMode() : _buildReadingMode()
-        ),
-      ],
-    ),
+          ),
+          Expanded(
+            child: _isEditing ? _buildEditingMode() : _buildReadingMode(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -57,7 +66,8 @@ class _NoteEditorState extends State<NoteEditor> {
 
   Widget _buildReadingMode() {
     return Markdown(
-          data: _controller.text,
-      );
+      data: _controller.text,
+      
+    );
   }
 }
