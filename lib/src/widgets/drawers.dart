@@ -77,7 +77,7 @@ class FilesView extends StatelessWidget {
           subtitle: Text(directory),
           onTap: () {
             String noteId = indexService.path2Id[key]!;
-            Note note = indexService.getNoteById(noteId);
+            Note note = indexService.getNoteById(noteId) ?? Note();
             note.id = noteId;
             onNoteSelected(note);
           },

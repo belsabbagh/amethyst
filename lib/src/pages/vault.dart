@@ -22,12 +22,16 @@ class _VaultPageState extends State<VaultPage> {
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _fileNameController = TextEditingController();
 
-  Note? _selectedNote;
+  String? _selectedNoteId;
 
   void onChanged(Note note) {
     setState(() {
       _noteController.text = note.toString();
-      _selectedNote = note;
+      _selectedNoteId = note.id;
+      if (note.id == '') {
+        _fileNameController.text = '';
+        return;
+      }
       _fileNameController.text = widget.indexService.id2Path[note.id]!.split('/').last;
     });
   }
@@ -39,7 +43,7 @@ class _VaultPageState extends State<VaultPage> {
         title: Text(widget.directoryPath),
       ),
       drawer: LeftDrawer(indexService: widget.indexService, onNoteSelected: onChanged),
-      endDrawer: RightDrawer(note: _selectedNote ?? Note()),
+      endDrawer: RightDrawer(note: widget.indexService.getNoteById(_selectedNoteId!) ?? Note()),
       body: Center(
           child: NoteEditor(
         noteController: _noteController,

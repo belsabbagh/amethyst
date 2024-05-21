@@ -47,11 +47,12 @@ class IndexService {
     return id2Path.length;
   }
 
-  Note getNoteById(String id) {
-    return Note.fromString(File(vault.absolutePath(id2Path[id]!)).readAsStringSync());
-  }
-
-  List<Note> getNotesByTag(String tag) {
-    return tags[tag]!.map((id) => getNoteById(id)).toList();
+  Note? getNoteById(String id) {
+    String? path = id2Path[id];
+    if (path == null) {
+      return null;
+    }
+    String fullPath = vault.absolutePath(path);
+    return Note.fromString(File(fullPath).readAsStringSync());
   }
 }
