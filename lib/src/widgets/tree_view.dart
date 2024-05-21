@@ -63,15 +63,3 @@ TreeNode<String> buildTree(IndexService indexService) {
   // }
   return tree;
 }
-
-class MyTreeView extends StatelessWidget {
-  final TreeNode<String> node;
-  final TreeViewController? _controller = null;
-  const MyTreeView({Key? key, required this.node}) : super(key: key);
-  MyTreeView.fromIndexService(IndexService indexService, {super.key})
-      : node = buildTree(indexService);
-  @override
-  Widget build(BuildContext context) {
-    return Text("Hello");
-  }
-}

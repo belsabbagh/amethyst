@@ -1,8 +1,11 @@
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:amethyst/src/core/models/vault.dart';
+import 'package:amethyst/src/widgets/note_editor.dart';
 import 'package:amethyst/src/widgets/tree_view.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -101,7 +104,7 @@ class LeftDrawer extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child: MyTreeView.fromIndexService(indexService)),
+                  Center(child: Text("FIle Tree here")),
                   const Center(child: SearchView()),
                   Center(child: TagView(indexService: indexService)),
                 ],
@@ -115,7 +118,7 @@ class LeftDrawer extends StatelessWidget {
 }
 
 class RightDrawer extends StatelessWidget {
-  Note note;
+  final Note note;
   RightDrawer({Key? key, required this.note}) : super(key: key);
 
   @override
@@ -135,7 +138,7 @@ class RightDrawer extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child:Text(note.props.toString())),
+                  Center(child: Text(note.props.toString())),
                   const Center(child: Text('Outlinks')),
                   Center(child: Text('Backlinks')),
                 ],
@@ -148,15 +151,13 @@ class RightDrawer extends StatelessWidget {
   }
 }
 
-
-
 class VaultPage extends StatefulWidget {
   final String directoryPath;
   late final IndexService indexService;
 
   VaultPage({Key? key, required this.directoryPath}) : super(key: key) {
-        indexService = IndexService(vault: Vault(path: directoryPath));
-          indexService.index();
+    indexService = IndexService(vault: Vault(path: directoryPath));
+    indexService.index();
   }
 
   @override
@@ -164,7 +165,13 @@ class VaultPage extends StatefulWidget {
 }
 
 class _VaultPageState extends State<VaultPage> {
-
+  final TextEditingController _controller = TextEditingController();
+  
+  void onChanged(String value) {
+    setState(() {
+      _controller.text = value;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,14 +181,8 @@ class _VaultPageState extends State<VaultPage> {
       drawer: LeftDrawer(indexService: widget.indexService),
       endDrawer: RightDrawer(note: Note()),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text('Count: ${widget.indexService.countNotes()}'),
-            Text('Tags: ${widget.indexService.tags.length}'),
-          ],
-        ),
-      ),
+          child: NoteEditor()
+    ),
     );
   }
 }
