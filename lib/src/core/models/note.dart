@@ -32,12 +32,13 @@ class Note {
   String body;
   Map<String, dynamic> props;
   Set<NoteLink> links;
-
+  String id = '';
   Note({
     this.tags = const {},
     this.body = '',
     this.props = const {},
     this.links = const {},
+    this.id = '',
   });
 
   Note copyWith({

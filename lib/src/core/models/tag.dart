@@ -3,7 +3,6 @@ class Tag {
   String name;
   Tag({required this.name}) {
     if (name.contains(' ')) {
-      print('Warning: tag $name contains spaces');
       throw Exception('Tag name cannot contain spaces');
     }
   }

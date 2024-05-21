@@ -46,4 +46,12 @@ class IndexService {
   int countNotes() {
     return id2Path.length;
   }
+
+  Note getNoteById(String id) {
+    return Note.fromString(File(vault.absolutePath(id2Path[id]!)).readAsStringSync());
+  }
+
+  List<Note> getNotesByTag(String tag) {
+    return tags[tag]!.map((id) => getNoteById(id)).toList();
+  }
 }

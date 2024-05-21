@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 class NoteEditor extends StatefulWidget {
-  const NoteEditor({Key? key}) : super(key: key);
+  final TextEditingController noteController;
+
+  final TextEditingController fileNameController;
+
+  const NoteEditor({super.key, required this.noteController, required this.fileNameController});
 
   @override
   _NoteEditorState createState() => _NoteEditorState();
@@ -10,8 +14,6 @@ class NoteEditor extends StatefulWidget {
 
 class _NoteEditorState extends State<NoteEditor> {
   bool _isEditing = false;
-  final TextEditingController _controller = TextEditingController();
-  final TextEditingController _fileNameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +29,8 @@ class _NoteEditorState extends State<NoteEditor> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _fileNameController,
-                  decoration: InputDecoration(
+                  controller: widget.fileNameController,
+                  decoration: const InputDecoration(
                     hintText: 'Enter file name',
                     contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
                   ),
@@ -54,7 +56,7 @@ class _NoteEditorState extends State<NoteEditor> {
 
   Widget _buildEditingMode() {
     return TextField(
-      controller: _controller,
+      controller: widget.noteController,
       maxLines: null,
       expands: true,
       decoration: const InputDecoration(
@@ -66,8 +68,7 @@ class _NoteEditorState extends State<NoteEditor> {
 
   Widget _buildReadingMode() {
     return Markdown(
-      data: _controller.text,
-      
+      data: widget.noteController.text,
     );
   }
 }

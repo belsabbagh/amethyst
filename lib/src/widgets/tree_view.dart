@@ -1,6 +1,6 @@
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:animated_tree_view/animated_tree_view.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 
 // Map<String, dynamic> buildTree(List<String> paths) {
 //   Map<String, dynamic> tree = {};
