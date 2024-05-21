@@ -28,6 +28,7 @@ class _VaultPageState extends State<VaultPage> {
     setState(() {
       _noteController.text = note.toString();
       _selectedNote = note;
+      _fileNameController.text = widget.indexService.id2Path[note.id]!.split('/').last;
     });
   }
 
