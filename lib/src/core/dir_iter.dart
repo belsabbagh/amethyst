@@ -1,10 +1,10 @@
 import 'dart:io';
 
 class DirectoryIterator {
-  static Iterable<String> notesPathIter(path) sync* {
+  static Iterable<String> notesPathIter(String path) sync* {
     for (FileSystemEntity entity in Directory(path).listSync(recursive: true)) {
-      var parts = entity.path.split(Platform.pathSeparator);
-      if (parts.map((e) => e.startsWith('.')).contains(true)) continue;
+      List<String> parts = entity.path.split(Platform.pathSeparator);
+      if (parts.any((e) => e.startsWith('.'))) continue;
       if (entity is File && entity.path.endsWith('.md')) {
         yield entity.path;
       }

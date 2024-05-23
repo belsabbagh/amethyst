@@ -20,7 +20,11 @@ class Parser {
   }
 
   Map<String, dynamic> parseProps(String frontMatter) {
+    try {
     YamlMap yaml = loadYaml(frontMatter) ?? YamlMap();
     return Map.from(yaml);
+    } catch (e) {
+      return {};
+    }
   }
 }

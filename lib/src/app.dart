@@ -3,6 +3,7 @@ import 'package:amethyst/src/pages/vault.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 
 class MyApp extends StatefulWidget {
@@ -17,18 +18,34 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Future<void> _pickDirectory(BuildContext context) async {
-    String? newDirectory = await FilePicker.platform.getDirectoryPath();
+    if (await _requestPermissions()) {
+      String? newDirectory = await FilePicker.platform.getDirectoryPath();
 
-    if (newDirectory == null) {
-      return;
+      if (newDirectory == null) {
+        return;
+      }
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VaultPage(directoryPath: newDirectory),
+        ),
+      );
+    } else {
+      // Handle the case where permissions are not granted
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Storage permission is required to pick a directory'),
+        ),
+      );
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VaultPage(directoryPath: newDirectory),
-      ),
-    );
   }
+
+  Future<bool> _requestPermissions() async {
+    PermissionStatus status = await Permission.manageExternalStorage.request();
+    return status.isGranted;
+  }
+
 
   @override
   Widget build(BuildContext context) {
