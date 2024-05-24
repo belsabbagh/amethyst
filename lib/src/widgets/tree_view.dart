@@ -1,65 +1,89 @@
-import 'package:amethyst/src/core/indexer.dart';
-import 'package:animated_tree_view/animated_tree_view.dart';
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 
-// Map<String, dynamic> buildTree(List<String> paths) {
-//   Map<String, dynamic> tree = {};
+class MyNode {
+  MyNode({
+    required this.title,
+    this.children = const <MyNode>[],
+  });
 
-//   for (String path in paths) {
-//     List<String> parts = path.split('/'); // Split path into parts
-//     Map<String, dynamic> currentNode = tree;
+  final String title;
+  List<MyNode> children;
 
-//     for (int i = 0; i < parts.length; i++) {
-//       String part = parts[i];
-//       if (part.isNotEmpty) {
-//         if (!currentNode.containsKey(part)) {
-//           // If the part doesn't exist, create a new directory or file
-//           if (i == parts.length - 1 || parts[i + 1].isEmpty) {
-//             currentNode[part] = ''; // File
-//           } else {
-//             currentNode[part] = {}; // Directory
-//           }
-//         }
-//         // Move to the next node
-//         currentNode = currentNode[part];
-//       }
-//     }
-//   }
-
-//   return tree;
-// }
-
-TreeNode<String> buildTreeFromPath(String path) {
-  TreeNode<String> root = TreeNode<String>();
-  List<String> parts = path.split('/');
-  if (parts[0] == path) {
-    return TreeNode(key: parts[0], data: parts[0]);
+  // Ensure children list is modifiable
+  void addChild(MyNode child) {
+    children = List.from(children)..add(child);
   }
-  dynamic currentNode = root;
-  for (int i = 0; i < parts.length; i++) {
-    String part = parts[i];
-    if (part.isNotEmpty) {
-      if (currentNode.children.containsKey(part)) {
-        currentNode = currentNode.children[part]!;
-        continue;
-      }
-      if (i == parts.length - 1 || parts[i + 1].isEmpty) {
-        currentNode.children[part] =
-            TreeNode(key: parts[0], data: parts[0]); // File
-      } else {
-        currentNode.children[part] =
-            buildTreeFromPath(parts.sublist(i).join('/'));
-      }
-    }
-  }
-  return currentNode;
 }
 
-TreeNode<String> buildTree(IndexService indexService) {
-  TreeNode<String> tree = TreeNode<String>();
-  // for (String id in indexService.id2Path.keys) {
-  //   String path = indexService.id2Path[id]!;
-  //   tree.children[path] = buildTreeFromPath(path);
-  // }
-  return tree;
+class MyTreeView extends StatefulWidget {
+  const MyTreeView({
+    Key? key,
+    required this.treeController,
+    required this.nodeBuilder,
+  }) : super(key: key);
+
+  final TreeController<MyNode> treeController;
+  final Widget Function(BuildContext, TreeEntry<MyNode>) nodeBuilder;
+
+  @override
+  State<MyTreeView> createState() => _MyTreeViewState();
+}
+
+class _MyTreeViewState extends State<MyTreeView> {
+  late final TreeController<MyNode> treeController;
+
+  @override
+  void initState() {
+    super.initState();
+    treeController = widget.treeController;
+  }
+
+  @override
+  void dispose() {
+    treeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TreeView<MyNode>(
+      treeController: treeController,
+      nodeBuilder: widget.nodeBuilder,
+    );
+  }
+}
+
+class MyTreeTile extends StatelessWidget {
+  const MyTreeTile({
+    Key? key,
+    required this.entry,
+    required this.onTap,
+  }) : super(key: key);
+
+  final TreeEntry<MyNode> entry;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: TreeIndentation(
+        entry: entry,
+        guide: const IndentGuide.connectingLines(indent: 48),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+          child: Row(
+            children: [
+              FolderButton(
+                isOpen: entry.hasChildren ? entry.isExpanded : null,
+                onPressed: entry.hasChildren ? onTap : null,
+              ),
+              Text(entry.node.title),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

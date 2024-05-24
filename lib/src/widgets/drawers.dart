@@ -1,9 +1,12 @@
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'tree_view.dart'; // Import the MyTreeView and MyNode classes
+
 
 class SearchView extends StatefulWidget {
-  const SearchView({Key? key}) : super(key: key);
+  const SearchView({super.key});
 
   @override
   _SearchViewState createState() => _SearchViewState();
@@ -58,39 +61,135 @@ class _SearchViewState extends State<SearchView> {
   }
 }
 
-class FilesView extends StatelessWidget {
+class FilesView extends StatefulWidget {
   final IndexService indexService;
   final void Function(Note note) onNoteSelected;
+
   const FilesView({Key? key, required this.indexService, required this.onNoteSelected}) : super(key: key);
 
   @override
+  _FilesViewState createState() => _FilesViewState();
+}
+
+class _FilesViewState extends State<FilesView> {
+  late final TreeController<MyNode> treeController;
+
+  @override
+  void initState() {
+    super.initState();
+    treeController = TreeController<MyNode>(
+      roots: _buildTreeNodes(),
+      childrenProvider: (MyNode node) => node.children,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: indexService.path2Id.length,
-      itemBuilder: (context, index) {
-        String key = indexService.path2Id.keys.elementAt(index);
-        // get note name
-        String noteName = key.split('/').last;
-        String directory = key.replaceAll(noteName, '');
-        return ListTile(
-          title: Text(noteName),
-          subtitle: Text(directory),
-          onTap: () {
-            String noteId = indexService.path2Id[key]!;
-            Note note = indexService.getNoteById(noteId) ?? Note();
-            note.id = noteId;
-            onNoteSelected(note);
-          },
+    return MyTreeView(
+      treeController: treeController,
+      nodeBuilder: (BuildContext context, TreeEntry<MyNode> entry) {
+        return MyTreeTile(
+          key: ValueKey(entry.node),
+          entry: entry,
+          onTap: () => _onNodeTap(entry.node)
         );
       },
     );
   }
+
+  List<MyNode> _buildTreeNodes() {
+    Map<String, MyNode> nodeMap = {};
+
+    // Helper function to get or create a node
+    MyNode _getNode(String path) {
+      if (!nodeMap.containsKey(path)) {
+        nodeMap[path] = MyNode(title: path.split('/').last);
+      }
+      return nodeMap[path]!;
+    }
+    print(widget.indexService.vault.path);
+
+    for (String path in widget.indexService.path2Id.keys) {
+      // first, delete the vault path from the start of the path if it exists
+      path = path.replaceFirst('${widget.indexService.vault.path}/', '');
+      List<String> parts = path.split('/');
+      String fullPath = '';
+      MyNode? parentNode;
+
+      for (int i = 0; i < parts.length; i++) {
+        String part = parts[i];
+        fullPath = fullPath.isEmpty ? part : '$fullPath/$part';
+
+        if (i == parts.length - 1) {
+          // This is a file node, add it as a child of its parent directory
+          MyNode fileNode = _getNode(part);
+          parentNode?.addChild(fileNode);
+        } else {
+          // This is a directory node, get or create it
+          if (parentNode == null) {
+            parentNode = _getNode(part);
+          } else {
+            parentNode = parentNode.children.firstWhere((node) => node.title == part, orElse: () {
+              MyNode dirNode = _getNode(part);
+              parentNode!.addChild(dirNode);
+              return dirNode;
+            });
+          }
+        }
+      }
+    }
+
+    // Find root nodes (nodes with no parents)
+    List<MyNode> roots = [];
+    Set<MyNode> allNodes = nodeMap.values.toSet();
+    Set<MyNode> childNodes = {};
+
+
+    // Identify all child nodes
+    for (MyNode node in allNodes) {
+      childNodes.addAll(node.children);
+    }
+
+    // Root nodes are those that are not child nodes
+    for (MyNode node in allNodes) {
+      if (!childNodes.contains(node)) {
+        roots.add(node);
+      }
+    }
+
+    return roots;
+  }
+
+  String _getFullPath(String nodeName) {
+    for (String path in widget.indexService.path2Id.keys) {
+      if (path.endsWith(nodeName)) {
+        return path;
+      }
+    }
+    return '';
+  }
+
+  void _onNodeTap(MyNode node) {
+    if (node.children.isNotEmpty) {
+      treeController.toggleExpansion(node);
+    } else {
+      String fullPath = _getFullPath(node.title);
+      String? noteId = widget.indexService.path2Id[fullPath];
+      if (noteId != null) {
+        Note note = widget.indexService.getNoteById(noteId) ?? Note();
+        note.id = noteId;
+        widget.onNoteSelected(note);
+      }
+    }
+  }
 }
+
+
 
 class TagView extends StatelessWidget {
   final IndexService indexService;
 
-  const TagView({Key? key, required this.indexService}) : super(key: key);
+  const TagView({super.key, required this.indexService});
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +209,7 @@ class TagView extends StatelessWidget {
 class LeftDrawer extends StatelessWidget {
   final IndexService indexService;
   final Function(Note) onNoteSelected;
-  const LeftDrawer({Key? key, required this.indexService, required this.onNoteSelected}) : super(key: key);
+  const LeftDrawer({super.key, required this.indexService, required this.onNoteSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +243,7 @@ class LeftDrawer extends StatelessWidget {
 
 class RightDrawer extends StatelessWidget {
   final Note note;
-  const RightDrawer({Key? key, required this.note}) : super(key: key);
+  const RightDrawer({super.key, required this.note});
 
   @override
   Widget build(BuildContext context) {

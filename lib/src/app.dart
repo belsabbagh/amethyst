@@ -1,7 +1,7 @@
 import 'package:amethyst/src/core/settings/settings_controller.dart';
 import 'package:amethyst/src/pages/vault.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
@@ -9,8 +9,7 @@ import 'package:file_picker/file_picker.dart';
 class MyApp extends StatefulWidget {
   final SettingsController settingsController; // Declare the named parameter
 
-  const MyApp({Key? key, required this.settingsController})
-      : super(key: key); // Pass the settingsController parameter
+  const MyApp({super.key, required this.settingsController}); // Pass the settingsController parameter
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -53,7 +52,7 @@ class _MyAppState extends State<MyApp> {
       restorationScopeId: 'app',
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
-        AppLocalizations.delegate,
+        // AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -62,7 +61,8 @@ class _MyAppState extends State<MyApp> {
         Locale('en', ''), // English, no country code
       ],
       onGenerateTitle: (BuildContext context) =>
-          AppLocalizations.of(context)!.appTitle,
+          // AppLocalizations.of(context)!.appTitle,
+          'Amethyst',
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Select Folder'),

@@ -25,7 +25,7 @@ class IndexService {
       id2Path[id] = path.replaceFirst(vault.path + Platform.pathSeparator, '');
       path2Id[path] = id;
     }
-    
+
     for (String id in id2Path.keys) {
       String path = id2Path[id]!;
       String text = File(vault.absolutePath(path)).readAsStringSync();
@@ -54,5 +54,9 @@ class IndexService {
     }
     String fullPath = vault.absolutePath(path);
     return Note.fromString(File(fullPath).readAsStringSync());
+  }
+
+  String getRootDirectory() {
+    return vault.path;
   }
 }

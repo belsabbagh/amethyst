@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 class VaultPage extends StatefulWidget {
   late final IndexService indexService;
 
-  VaultPage({Key? key, required directoryPath}) : super(key: key) {
+  VaultPage({super.key, required directoryPath}) {
     indexService = IndexService(vault: Vault(path: directoryPath));
     indexService.index();
   }
