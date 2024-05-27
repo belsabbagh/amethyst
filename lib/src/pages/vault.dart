@@ -7,21 +7,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 class VaultPage extends StatefulWidget {
-  late final IndexService indexService;
-
-  VaultPage({super.key, required directoryPath}) {
-    indexService = IndexService(vault: Vault(path: directoryPath));
-    indexService.index();
-  }
+  final String directoryPath;
+  
+  VaultPage({super.key, required this.directoryPath});
 
   @override
   _VaultPageState createState() => _VaultPageState();
 }
 
 class _VaultPageState extends State<VaultPage> {
+  late final IndexService indexService;
+  late Future<IndexService> _indexingFuture;
   final TextEditingController _fileNameController = TextEditingController();
-final QuillController _noteController = QuillController.basic();
+  final QuillController _noteController = QuillController.basic();
   Note _selectedNote = Note();
+
+  @override
+  void initState() {
+    super.initState();
+    indexService = IndexService(vault: Vault(path: widget.directoryPath));
+    _indexingFuture = Future<IndexService>(() => indexService.index());
+  }
 
   void onChanged(Note note) {
     print(note.toString());
@@ -33,7 +39,7 @@ final QuillController _noteController = QuillController.basic();
         return;
       }
       _fileNameController.text =
-          widget.indexService.id2Path[note.id]!;
+          indexService.id2Path[note.id]!;
       _noteController.document = Document.fromJson([{'insert':'${note.toString()}\n'}]);
     });
   }
@@ -42,20 +48,31 @@ final QuillController _noteController = QuillController.basic();
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.indexService.vault.path),
+        title: Text(widget.directoryPath),
       ),
       drawer: LeftDrawer(
-          indexService: widget.indexService, onNoteSelected: onChanged),
+          indexService: indexService, onNoteSelected: onChanged),
       endDrawer: RightDrawer(
           note: _selectedNote,
-          indexService: widget.indexService,
+          indexService: indexService,
           onNoteSelected: onChanged),
-      body: Center(
-        child: NoteEditor(
-          fileNameController: _fileNameController,
-          noteController: _noteController,
-          onChange: onChanged,
-        ),
+      body: FutureBuilder<IndexService>(
+        future: _indexingFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          return Center(
+              child: NoteEditor(
+                fileNameController: _fileNameController,
+                noteController: _noteController,
+                onChange: onChanged,
+              ),
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }
