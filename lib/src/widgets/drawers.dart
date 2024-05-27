@@ -1,4 +1,5 @@
 import 'package:amethyst/src/core/indexer.dart';
+import 'package:amethyst/src/core/models/link.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
@@ -260,9 +261,8 @@ class RightDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> outlinks = getOutlinks();
+    List<NoteLink> outlinks = note.links.toList();
     List<String> backlinks = getBacklinks();
-    print(outlinks);
     return Drawer(
       child: DefaultTabController(
         length: 3, // Number of tabs
@@ -285,12 +285,11 @@ class RightDrawer extends StatelessWidget {
                           itemCount: outlinks.length,
                           itemBuilder: (context, index) {
                             return ListTile(
-                              title: Text(
-                                  indexService.id2Path[outlinks[index]] ??
-                                      'bad'),
+                              title: Text(outlinks[index].alias),
+                              subtitle: Text(outlinks[index].path),
                               onTap: () {
                                 Note note =
-                                    indexService.getNoteById(outlinks[index])!;
+                                    indexService.getNoteByPath("${outlinks[index].path}.md") ?? Note();
                                 onNoteSelected(note);
                               },
                             );
