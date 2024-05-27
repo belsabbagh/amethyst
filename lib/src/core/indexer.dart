@@ -45,12 +45,16 @@ class IndexService {
     return this;
   }
 
-  void updateNote(String id) {
+  void updateNote(String id, String path, String text) {
     // remove outlinks and inlinks
     outlinks.remove(id);
     inlinks.remove(id);
-    String path = id2Path[id]!;
-    String text = File(vault.absolutePath(path)).readAsStringSync();
+    String oldPath = id2Path[id] ?? '';
+    id2Path.remove(id);
+    path2Id.remove(oldPath);
+
+    id2Path[id] = path.replaceFirst(vault.path + Platform.pathSeparator, '');
+    path2Id[id2Path[id]!] = id;
     Note note = Note.fromString(text);
     for (String tag in note.tags) {
       tags.putIfAbsent(tag, () => {}).add(id);

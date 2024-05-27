@@ -1,3 +1,4 @@
+import 'package:amethyst/src/core/models/vault.dart';
 import 'package:amethyst/src/core/settings/settings_controller.dart';
 import 'package:amethyst/src/pages/vault.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,8 @@ class _MyAppState extends State<MyApp> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => VaultPage(directoryPath: newDirectory),
+        
+          builder: (context) => VaultPage(vault: Vault(path: newDirectory)),
         ),
       );
     } else {

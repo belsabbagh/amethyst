@@ -20,20 +20,19 @@ class NoteEditor extends StatefulWidget {
 
 class _NoteEditorState extends State<NoteEditor> {
   bool _isEditing = false;
-  
 
   void _runOnChange(String text) {
-    print(text);
     widget.onChange(Note.fromString(text));
   }
 
-@override
-void initState() {
-  super.initState();
-  widget.noteController.document.changes.listen((change) {
-    widget.onChange(Note.fromString(widget.noteController.document.toPlainText()));
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+    widget.noteController.document.changes.listen((change) {
+      _runOnChange(widget.noteController.document.toPlainText());
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -77,11 +76,11 @@ void initState() {
 
   Widget _buildEditingMode(Function(String) onChange) {
     return QuillEditor.basic(
-          configurations: QuillEditorConfigurations(
-            controller: widget.noteController,
-            padding: const EdgeInsets.all(16.0),
-          ),
-        );
+      configurations: QuillEditorConfigurations(
+        controller: widget.noteController,
+        padding: const EdgeInsets.all(16.0),
+      ),
+    );
   }
 
   Widget _buildReadingMode() {

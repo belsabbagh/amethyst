@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:amethyst/src/core/models/vault.dart';
@@ -8,9 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 
 class VaultPage extends StatefulWidget {
-  final String directoryPath;
-  
-  const VaultPage({super.key, required this.directoryPath});
+  final Vault vault;
+  const VaultPage({super.key, required this.vault});
 
   @override
   _VaultPageState createState() => _VaultPageState();
@@ -26,7 +27,7 @@ class _VaultPageState extends State<VaultPage> {
   @override
   void initState() {
     super.initState();
-    indexService = IndexService(vault: Vault(path: widget.directoryPath));
+    indexService = IndexService(vault: widget.vault);
     _indexingFuture = Future<IndexService>(() => indexService.index());
   }
 
@@ -34,22 +35,38 @@ class _VaultPageState extends State<VaultPage> {
     print(note.toString());
     setState(() {
       _selectedNote = note;
-      if (note.id == '') {
-        _fileNameController.text = '';
-        _noteController.document = Document();
-        return;
-      }
       _fileNameController.text =
-          indexService.id2Path[note.id]!;
+          indexService.id2Path[note.id] ?? '';
       _noteController.document = Document.fromJson([{'insert':'${note.toString()}\n'}]);
     });
+  }
+
+  void saveNote(Note note) {
+    String path = _fileNameController.text;
+    String text = _noteController.document.toPlainText();
+    print(text);
+    note = Note.fromString(text);
+    indexService.updateNote(note.id, path, text);
+    String fullPath = widget.vault.absolutePath(path);
+    if (!File(fullPath).existsSync()) {
+      File(fullPath).createSync();
+    }
+    File(fullPath).writeAsStringSync(text);
+  }
+
+  void deleteNote(Note note) {
+    File(widget.vault.absolutePath(indexService.id2Path[note.id]!)).delete();
+  }
+
+  void renameNote(Note note) {
+    indexService.updateNote(note.id, _fileNameController.text, _noteController.document.toPlainText());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.directoryPath),
+        title: Text(widget.vault.path),
       ),
       drawer: LeftDrawer(
           indexService: indexService, onNoteSelected: onChanged),
@@ -57,7 +74,7 @@ class _VaultPageState extends State<VaultPage> {
           note: _selectedNote,
           indexService: indexService,
           onNoteSelected: onChanged,
-          saveNote: (Note note) {},
+          saveNote: saveNote,
           deleteNote: (Note note) {},
           renameNote: (Note note) {},),
       body: FutureBuilder<IndexService>(
