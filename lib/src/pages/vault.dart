@@ -1,7 +1,8 @@
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:amethyst/src/core/models/vault.dart';
-import 'package:amethyst/src/widgets/drawers.dart';
+import 'package:amethyst/src/widgets/drawers/left_drawer.dart';
+import 'package:amethyst/src/widgets/drawers/right_drawer.dart';
 import 'package:amethyst/src/widgets/note_editor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
@@ -9,7 +10,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 class VaultPage extends StatefulWidget {
   final String directoryPath;
   
-  VaultPage({super.key, required this.directoryPath});
+  const VaultPage({super.key, required this.directoryPath});
 
   @override
   _VaultPageState createState() => _VaultPageState();
@@ -55,7 +56,10 @@ class _VaultPageState extends State<VaultPage> {
       endDrawer: RightDrawer(
           note: _selectedNote,
           indexService: indexService,
-          onNoteSelected: onChanged),
+          onNoteSelected: onChanged,
+          saveNote: (Note note) {},
+          deleteNote: (Note note) {},
+          renameNote: (Note note) {},),
       body: FutureBuilder<IndexService>(
         future: _indexingFuture,
         builder: (context, snapshot) {
