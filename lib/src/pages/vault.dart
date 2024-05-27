@@ -4,6 +4,7 @@ import 'package:amethyst/src/core/models/vault.dart';
 import 'package:amethyst/src/widgets/drawers.dart';
 import 'package:amethyst/src/widgets/note_editor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 
 class VaultPage extends StatefulWidget {
   late final IndexService indexService;
@@ -18,21 +19,22 @@ class VaultPage extends StatefulWidget {
 }
 
 class _VaultPageState extends State<VaultPage> {
-  final TextEditingController _noteController = TextEditingController();
   final TextEditingController _fileNameController = TextEditingController();
-
-  String? _selectedNoteId;
+final QuillController _noteController = QuillController.basic();
+  Note _selectedNote = Note();
 
   void onChanged(Note note) {
+    print(note.toString());
     setState(() {
-      _noteController.text = note.toString();
-      _selectedNoteId = note.id;
+      _selectedNote = note;
       if (note.id == '') {
         _fileNameController.text = '';
+        _noteController.document = Document();
         return;
       }
       _fileNameController.text =
-          widget.indexService.id2Path[note.id]!.split('/').last;
+          widget.indexService.id2Path[note.id]!;
+      _noteController.document = Document.fromJson([{'insert':'${note.toString()}\n'}]);
     });
   }
 
@@ -45,11 +47,14 @@ class _VaultPageState extends State<VaultPage> {
       drawer: LeftDrawer(
           indexService: widget.indexService, onNoteSelected: onChanged),
       endDrawer: RightDrawer(
-          note: widget.indexService.getNoteById(_selectedNoteId ?? '') ?? Note()),
+          note: _selectedNote,
+          indexService: widget.indexService,
+          onNoteSelected: onChanged),
       body: Center(
         child: NoteEditor(
-          noteController: _noteController,
           fileNameController: _fileNameController,
+          noteController: _noteController,
+          onChange: onChanged,
         ),
       ),
     );

@@ -28,6 +28,7 @@ dependencies:
   yaml_writer: ^2.0.0
 
   flutter_gen: any
+  flutter_quill: ^9.3.11
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'tree_view.dart'; // Import the MyTreeView and MyNode classes
 
-
 class SearchView extends StatefulWidget {
   const SearchView({super.key});
 
@@ -65,7 +64,9 @@ class FilesView extends StatefulWidget {
   final IndexService indexService;
   final void Function(Note note) onNoteSelected;
 
-  const FilesView({Key? key, required this.indexService, required this.onNoteSelected}) : super(key: key);
+  const FilesView(
+      {Key? key, required this.indexService, required this.onNoteSelected})
+      : super(key: key);
 
   @override
   _FilesViewState createState() => _FilesViewState();
@@ -89,10 +90,9 @@ class _FilesViewState extends State<FilesView> {
       treeController: treeController,
       nodeBuilder: (BuildContext context, TreeEntry<MyNode> entry) {
         return MyTreeTile(
-          key: ValueKey(entry.node),
-          entry: entry,
-          onTap: () => _onNodeTap(entry.node)
-        );
+            key: ValueKey(entry.node),
+            entry: entry,
+            onTap: () => _onNodeTap(entry.node));
       },
     );
   }
@@ -101,41 +101,40 @@ class _FilesViewState extends State<FilesView> {
     Map<String, MyNode> nodeMap = {};
 
     // Helper function to get or create a node
-    MyNode _getNode(String path) {
-      if (!nodeMap.containsKey(path)) {
-        nodeMap[path] = MyNode(title: path.split('/').last);
-      }
-      return nodeMap[path]!;
+    MyNode getNode(String path) {
+      return nodeMap.putIfAbsent(
+          path, () => MyNode(title: path.split('/').last));
     }
+
     print(widget.indexService.vault.path);
 
-    for (String path in widget.indexService.path2Id.keys) {
+    for (String id in widget.indexService.id2Path.keys) {
       // first, delete the vault path from the start of the path if it exists
-      path = path.replaceFirst('${widget.indexService.vault.path}/', '');
+      String path = widget.indexService.id2Path[id]!;
       List<String> parts = path.split('/');
-      String fullPath = '';
       MyNode? parentNode;
 
       for (int i = 0; i < parts.length; i++) {
         String part = parts[i];
-        fullPath = fullPath.isEmpty ? part : '$fullPath/$part';
 
         if (i == parts.length - 1) {
           // This is a file node, add it as a child of its parent directory
-          MyNode fileNode = _getNode(part);
+          MyNode fileNode = getNode(part);
+          fileNode.key = id;
           parentNode?.addChild(fileNode);
-        } else {
-          // This is a directory node, get or create it
-          if (parentNode == null) {
-            parentNode = _getNode(part);
-          } else {
-            parentNode = parentNode.children.firstWhere((node) => node.title == part, orElse: () {
-              MyNode dirNode = _getNode(part);
-              parentNode!.addChild(dirNode);
-              return dirNode;
-            });
-          }
+          continue;
         }
+        // This is a directory node, get or create it
+        if (parentNode == null) {
+          parentNode = getNode(part);
+          continue;
+        }
+        parentNode = parentNode.children
+            .firstWhere((node) => node.title == part, orElse: () {
+          MyNode dirNode = getNode(part);
+          parentNode!.addChild(dirNode);
+          return dirNode;
+        });
       }
     }
 
@@ -143,7 +142,6 @@ class _FilesViewState extends State<FilesView> {
     List<MyNode> roots = [];
     Set<MyNode> allNodes = nodeMap.values.toSet();
     Set<MyNode> childNodes = {};
-
 
     // Identify all child nodes
     for (MyNode node in allNodes) {
@@ -172,19 +170,16 @@ class _FilesViewState extends State<FilesView> {
   void _onNodeTap(MyNode node) {
     if (node.children.isNotEmpty) {
       treeController.toggleExpansion(node);
-    } else {
-      String fullPath = _getFullPath(node.title);
-      String? noteId = widget.indexService.path2Id[fullPath];
-      if (noteId != null) {
-        Note note = widget.indexService.getNoteById(noteId) ?? Note();
-        note.id = noteId;
-        widget.onNoteSelected(note);
-      }
+      return;
+    }
+    String? noteId = node.key;
+    if (noteId != null) {
+      Note note = widget.indexService.getNoteById(noteId) ?? Note();
+      note.id = noteId;
+      widget.onNoteSelected(note);
     }
   }
 }
-
-
 
 class TagView extends StatelessWidget {
   final IndexService indexService;
@@ -209,7 +204,8 @@ class TagView extends StatelessWidget {
 class LeftDrawer extends StatelessWidget {
   final IndexService indexService;
   final Function(Note) onNoteSelected;
-  const LeftDrawer({super.key, required this.indexService, required this.onNoteSelected});
+  const LeftDrawer(
+      {super.key, required this.indexService, required this.onNoteSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +224,10 @@ class LeftDrawer extends StatelessWidget {
             Expanded(
               child: TabBarView(
                 children: [
-                  Center(child: FilesView(indexService: indexService, onNoteSelected: onNoteSelected)),
+                  Center(
+                      child: FilesView(
+                          indexService: indexService,
+                          onNoteSelected: onNoteSelected)),
                   const Center(child: SearchView()),
                   Center(child: TagView(indexService: indexService)),
                 ],
@@ -243,10 +242,27 @@ class LeftDrawer extends StatelessWidget {
 
 class RightDrawer extends StatelessWidget {
   final Note note;
-  const RightDrawer({super.key, required this.note});
+  final IndexService indexService;
+  final Function(Note) onNoteSelected;
+  const RightDrawer(
+      {super.key,
+      required this.note,
+      required this.indexService,
+      required this.onNoteSelected});
+
+  List<String> getOutlinks() {
+    return indexService.outlinks[note.id] ?? [];
+  }
+
+  List<String> getBacklinks() {
+    return indexService.inlinks[note.id] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<String> outlinks = getOutlinks();
+    List<String> backlinks = getBacklinks();
+    print(outlinks);
     return Drawer(
       child: DefaultTabController(
         length: 3, // Number of tabs
@@ -263,8 +279,40 @@ class RightDrawer extends StatelessWidget {
               child: TabBarView(
                 children: [
                   Center(child: Text(note.props.toString())),
-                  const Center(child: Text('Outlinks')),
-                  const Center(child: Text('Backlinks')),
+                  outlinks.isEmpty
+                      ? const Center(child: Text('No outlinks'))
+                      : ListView.builder(
+                          itemCount: outlinks.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                  indexService.id2Path[outlinks[index]] ??
+                                      'bad'),
+                              onTap: () {
+                                Note note =
+                                    indexService.getNoteById(outlinks[index])!;
+                                onNoteSelected(note);
+                              },
+                            );
+                          },
+                        ),
+                  backlinks.isEmpty
+                      ? const Center(child: Text('No backlinks'))
+                      : ListView.builder(
+                          itemCount: backlinks.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(
+                                  indexService.id2Path[backlinks[index]] ??
+                                      'bad'),
+                              onTap: () {
+                                Note note = indexService
+                                        .getNoteById(backlinks[index]) ??
+                                    Note();
+                                onNoteSelected(note);
+                              },
+                            );
+                          })
                 ],
               ),
             ),

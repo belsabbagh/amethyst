@@ -26,7 +26,7 @@ class IndexService {
       path2Id[path] = id;
     }
 
-    for (String id in id2Path.keys) {
+    for (String id in List.from(id2Path.keys)) {
       String path = id2Path[id]!;
       String text = File(vault.absolutePath(path)).readAsStringSync();
       Note note = Note.fromString(text);
@@ -43,6 +43,24 @@ class IndexService {
     return this;
   }
 
+  void updateNote(String id) {
+    // remove outlinks and inlinks
+    outlinks.remove(id);
+    inlinks.remove(id);
+    String path = id2Path[id]!;
+    String text = File(vault.absolutePath(path)).readAsStringSync();
+    Note note = Note.fromString(text);
+    for (String tag in note.tags) {
+      tags.putIfAbsent(tag, () => {}).add(id);
+    }
+    for (NoteLink link in note.links.toList()) {
+      String linkPath = link.path;
+      String linkId = path2Id.putIfAbsent(linkPath, () => const Uuid().v8());
+      outlinks.putIfAbsent(id, () => []).add(linkId);
+      inlinks.putIfAbsent(linkId, () => []).add(id);
+    }
+  }
+
   int countNotes() {
     return id2Path.length;
   }
@@ -53,7 +71,9 @@ class IndexService {
       return null;
     }
     String fullPath = vault.absolutePath(path);
-    return Note.fromString(File(fullPath).readAsStringSync());
+    Note n = Note.fromString(File(fullPath).readAsStringSync());
+    n.id = id;
+    return n;
   }
 
   String getRootDirectory() {

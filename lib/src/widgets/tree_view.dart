@@ -4,10 +4,12 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 class MyNode {
   MyNode({
     required this.title,
+    this.key,
     this.children = const <MyNode>[],
   });
 
   final String title;
+  String? key;
   List<MyNode> children;
 
   // Ensure children list is modifiable
