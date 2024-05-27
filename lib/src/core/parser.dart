@@ -2,7 +2,7 @@ import 'package:amethyst/src/core/models/link.dart';
 import 'package:yaml/yaml.dart';
 
 class Parser {
-  final RegExp frontMatterExp = RegExp(r'---\n([\s\S]+?)---\n(.+)');
+  final RegExp frontMatterExp = RegExp(r'---\n([\s\S]+?)---\n(.+)', dotAll: true);
   final RegExp tagsExp = RegExp(r'\#([a-zA-Z_\-\/]+\b)(?!;)');
   final RegExp linksExp = RegExp(r'\[\[([^|]+?)(?:\|(.*?))*\]\]');
 

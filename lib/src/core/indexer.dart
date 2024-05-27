@@ -23,7 +23,7 @@ class IndexService {
     for (String path in vault.notes) {
       String id = const Uuid().v8();
       id2Path[id] = path.replaceFirst(vault.path + Platform.pathSeparator, '');
-      path2Id[path] = id;
+      path2Id[id2Path[id]!] = id;
     }
 
     for (String id in List.from(id2Path.keys)) {
@@ -34,8 +34,10 @@ class IndexService {
         tags.putIfAbsent(tag, () => {}).add(id);
       }
       for (NoteLink link in note.links.toList()) {
-        String linkPath = link.path;
-        String linkId = path2Id.putIfAbsent(linkPath, () => const Uuid().v8());
+        String linkPath = link.path + '.md';
+        String linkId = path2Id.putIfAbsent(linkPath, () 
+        { print("isAbsent: $linkPath");
+          return const Uuid().v8();});
         outlinks.putIfAbsent(id, () => []).add(linkId);
         inlinks.putIfAbsent(linkId, () => []).add(id);
       }
@@ -54,7 +56,7 @@ class IndexService {
       tags.putIfAbsent(tag, () => {}).add(id);
     }
     for (NoteLink link in note.links.toList()) {
-      String linkPath = link.path;
+      String linkPath = "${link.path}.md";
       String linkId = path2Id.putIfAbsent(linkPath, () => const Uuid().v8());
       outlinks.putIfAbsent(id, () => []).add(linkId);
       inlinks.putIfAbsent(linkId, () => []).add(id);
@@ -74,6 +76,14 @@ class IndexService {
     Note n = Note.fromString(File(fullPath).readAsStringSync());
     n.id = id;
     return n;
+  }
+
+  Note? getNoteByPath(String path) {
+    String? id = path2Id[path];
+    if (id == null) {
+      return null;
+    }
+    return getNoteById(id);
   }
 
   String getRootDirectory() {
