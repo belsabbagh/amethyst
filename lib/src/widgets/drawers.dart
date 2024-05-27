@@ -5,7 +5,10 @@ import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'tree_view.dart'; // Import the MyTreeView and MyNode classes
 
 class SearchView extends StatefulWidget {
-  const SearchView({super.key});
+  final IndexService indexService;
+  final void Function(Note note) onNoteSelected;
+
+  const SearchView({Key? key, required this.indexService, required this.onNoteSelected}) : super(key: key);
 
   @override
   _SearchViewState createState() => _SearchViewState();
@@ -13,13 +16,21 @@ class SearchView extends StatefulWidget {
 
 class _SearchViewState extends State<SearchView> {
   final TextEditingController _controller = TextEditingController();
-  List<String> _results = [];
+  List<Note> _results = [];
 
-  void _performSearch(String query) {
-    // Simulate a search by generating some dummy results
+  void _performSearch(String query) async {
+    query = query.toLowerCase();
+    await Future.delayed(const Duration(milliseconds: 300));
+
     setState(() {
-      _results =
-          List.generate(10, (index) => 'Result ${index + 1} for "$query"');
+      _results = widget.indexService.id2Path.keys.map((id) {
+        return widget.indexService.getNoteById(id);
+      }).where((note) {
+        if (note == null) return false;
+        return note.body.toLowerCase().contains(query) ||
+               note.tags.any((tag) => tag.toLowerCase().contains(query)) ||
+               note.props.values.any((value) => value.toString().toLowerCase().contains(query));
+      }).toList().cast<Note>();
     });
   }
 
@@ -50,7 +61,11 @@ class _SearchViewState extends State<SearchView> {
                   itemCount: _results.length,
                   itemBuilder: (context, index) {
                     return ListTile(
-                      title: Text(_results[index]),
+                      title: Text(_results[index].props['title'] ?? 'Untitled'),
+                      subtitle: Text(_results[index].body),
+                      onTap: () {
+                        widget.onNoteSelected(_results[index]);
+                      },
                     );
                   },
                 ),
@@ -59,6 +74,7 @@ class _SearchViewState extends State<SearchView> {
     );
   }
 }
+
 
 class FilesView extends StatefulWidget {
   final IndexService indexService;
@@ -204,8 +220,8 @@ class TagView extends StatelessWidget {
 class LeftDrawer extends StatelessWidget {
   final IndexService indexService;
   final Function(Note) onNoteSelected;
-  const LeftDrawer(
-      {super.key, required this.indexService, required this.onNoteSelected});
+
+  const LeftDrawer({super.key, required this.indexService, required this.onNoteSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -228,7 +244,7 @@ class LeftDrawer extends StatelessWidget {
                       child: FilesView(
                           indexService: indexService,
                           onNoteSelected: onNoteSelected)),
-                  const Center(child: SearchView()),
+                  Center(child: SearchView(indexService: indexService, onNoteSelected: onNoteSelected)),
                   Center(child: TagView(indexService: indexService)),
                 ],
               ),
