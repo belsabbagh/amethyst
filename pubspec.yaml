@@ -29,6 +29,7 @@ dependencies:
 
   flutter_gen: any
   flutter_quill: ^9.3.11
+  sqflite: ^2.3.3+1
 dev_dependencies:
   flutter_test:
     sdk: flutter

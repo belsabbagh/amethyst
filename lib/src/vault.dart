@@ -81,42 +81,42 @@ class _VaultPageState extends State<VaultPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.vault.path.split(Platform.pathSeparator).last),
-      ),
-      drawer: LeftDrawer(indexService: indexService, onNoteSelected: onChanged),
-      endDrawer: RightDrawer(
-        note: _selectedNote,
-        indexService: indexService,
-        onNoteSelected: onChanged,
-        saveNote: saveNote,
-        deleteNote: deleteNote,
-        renameNote: renameNote,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: openNewNote,
-        child: const Icon(Icons.add),
-      ),
-      body: FutureBuilder<IndexService>(
-        future: _indexingFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            return Center(
-              child: NoteEditor(
-                fileNameController: _fileNameController,
-                noteController: _noteController,
-                onChange: onChanged,
-              ),
-            );
-          }
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(widget.vault.path.split(Platform.pathSeparator).last),
+    ),
+    drawer: LeftDrawer(indexService: indexService, onNoteSelected: onChanged),
+    endDrawer: RightDrawer(
+      note: _selectedNote,
+      indexService: indexService,
+      onNoteSelected: onChanged,
+      saveNote: saveNote,
+      deleteNote: deleteNote,
+      renameNote: renameNote,
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: openNewNote,
+      child: const Icon(Icons.add),
+    ),
+    body: FutureBuilder<IndexService>(
+      future: _indexingFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
-  }
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          return Center(
+            child: NoteEditor(
+              fileNameController: _fileNameController,
+              noteController: _noteController,
+              onChange: onChanged,
+            ),
+          );
+        }
+      },
+    ),
+  );
+}
 }

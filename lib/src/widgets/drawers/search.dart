@@ -22,22 +22,26 @@ class _SearchViewState extends State<SearchView> {
 
   void _performSearch(String query) async {
     query = query.toLowerCase();
-    await Future.delayed(const Duration(milliseconds: 300));
+    // await Future.delayed(const Duration(milliseconds: 300));
 
-    setState(() {
-      _results = widget.indexService.id2Path.keys
-          .map((id) {
-            return widget.indexService.getNoteById(id);
-          })
-          .where((note) {
-            if (note == null) return false;
-            return note.body.toLowerCase().contains(query) ||
-                note.tags.any((tag) => tag.toLowerCase().contains(query)) ||
-                note.props.values.any(
-                    (value) => value.toString().toLowerCase().contains(query));
-          })
-          .toList()
-          .cast<Note>();
+    // setState(() {
+    //   _results = widget.indexService.id2Path.keys
+    //       .map((id) {
+    //         return widget.indexService.getNoteById(id);
+    //       })
+    //       .where((note) {
+    //         if (note == null) return false;
+    //         return note.body.toLowerCase().contains(query) ||
+    //             note.tags.any((tag) => tag.toLowerCase().contains(query)) ||
+    //             note.props.values.any(
+    //                 (value) => value.toString().toLowerCase().contains(query));
+    //       })
+    //       .toList()
+    //       .cast<Note>();
+    // });
+    List<Note> sqlResults = await widget.indexService.searchSql(query);
+    setState((){
+      _results = sqlResults;
     });
   }
 
