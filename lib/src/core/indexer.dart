@@ -34,7 +34,7 @@ class IndexService {
         tags.putIfAbsent(tag, () => {}).add(id);
       }
       for (NoteLink link in note.links.toList()) {
-        String linkPath = link.path + '.md';
+        String linkPath = '${link.path}.md';
         String linkId = path2Id.putIfAbsent(linkPath, () 
         { print("isAbsent: $linkPath");
           return const Uuid().v8();});
@@ -52,7 +52,7 @@ class IndexService {
     String oldPath = id2Path[id] ?? '';
     id2Path.remove(id);
     path2Id.remove(oldPath);
-
+    File(vault.absolutePath(oldPath)).rename(vault.absolutePath(path));
     id2Path[id] = path.replaceFirst(vault.path + Platform.pathSeparator, '');
     path2Id[id2Path[id]!] = id;
     Note note = Note.fromString(text);
@@ -92,5 +92,16 @@ class IndexService {
 
   String getRootDirectory() {
     return vault.path;
+  }
+
+  void removeNote(String id) {
+    String? path = id2Path[id];
+    if (path == null) {
+      return;
+    }
+    String fullPath = vault.absolutePath(path);
+    File(fullPath).deleteSync();
+    id2Path.remove(id);
+    path2Id.remove(path);
   }
 }

@@ -1,7 +1,5 @@
 import 'dart:math';
 
-
-
 import 'package:amethyst/src/core/indexer.dart';
 import 'package:amethyst/src/core/models/note.dart';
 import 'package:flutter/material.dart';

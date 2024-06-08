@@ -55,7 +55,12 @@ class _VaultPageState extends State<VaultPage> {
   }
 
   void deleteNote(Note note) {
-    File(widget.vault.absolutePath(indexService.id2Path[note.id]!)).delete();
+    indexService.removeNote(note.id);
+    setState(() {
+      _selectedNote = Note();
+      _noteController.document = Document();
+      _fileNameController.text = '';
+    });
   }
 
   void renameNote(Note note) {
@@ -75,8 +80,8 @@ class _VaultPageState extends State<VaultPage> {
           indexService: indexService,
           onNoteSelected: onChanged,
           saveNote: saveNote,
-          deleteNote: (Note note) {},
-          renameNote: (Note note) {},),
+          deleteNote: deleteNote,
+          renameNote: renameNote,),
       body: FutureBuilder<IndexService>(
         future: _indexingFuture,
         builder: (context, snapshot) {

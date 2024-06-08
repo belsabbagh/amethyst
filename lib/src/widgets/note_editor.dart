@@ -8,7 +8,7 @@ class NoteEditor extends StatefulWidget {
   final QuillController noteController;
   final Function(Note) onChange;
 
-  NoteEditor(
+    const NoteEditor(
       {super.key,
       required this.fileNameController,
       required this.noteController,
