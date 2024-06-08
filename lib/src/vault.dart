@@ -35,9 +35,10 @@ class _VaultPageState extends State<VaultPage> {
     print(note.toString());
     setState(() {
       _selectedNote = note;
-      _fileNameController.text =
-          indexService.id2Path[note.id] ?? '';
-      _noteController.document = Document.fromJson([{'insert':'${note.toString()}\n'}]);
+      _fileNameController.text = indexService.id2Path[note.id] ?? '';
+      _noteController.document = Document.fromJson([
+        {'insert': '${note.toString()}\n'}
+      ]);
     });
   }
 
@@ -64,32 +65,48 @@ class _VaultPageState extends State<VaultPage> {
   }
 
   void renameNote(Note note) {
-    indexService.updateNote(note.id, _fileNameController.text, _noteController.document.toPlainText());
+    indexService.updateNote(note.id, _fileNameController.text,
+        _noteController.document.toPlainText());
+  }
+
+  void openNewNote() {
+    if (_fileNameController.text.isEmpty) {
+      return;
+    }
+    setState(() {
+      _selectedNote = Note();
+      _fileNameController.text = '';
+      _noteController.document = Document();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.vault.path),
+        title: Text(widget.vault.path.split(Platform.pathSeparator).last),
       ),
-      drawer: LeftDrawer(
-          indexService: indexService, onNoteSelected: onChanged),
+      drawer: LeftDrawer(indexService: indexService, onNoteSelected: onChanged),
       endDrawer: RightDrawer(
-          note: _selectedNote,
-          indexService: indexService,
-          onNoteSelected: onChanged,
-          saveNote: saveNote,
-          deleteNote: deleteNote,
-          renameNote: renameNote,),
+        note: _selectedNote,
+        indexService: indexService,
+        onNoteSelected: onChanged,
+        saveNote: saveNote,
+        deleteNote: deleteNote,
+        renameNote: renameNote,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: openNewNote,
+        child: const Icon(Icons.add),
+      ),
       body: FutureBuilder<IndexService>(
         future: _indexingFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          return Center(
+              return Center(child: Text('Error: ${snapshot.error}'));
+            }
+            return Center(
               child: NoteEditor(
                 fileNameController: _fileNameController,
                 noteController: _noteController,
