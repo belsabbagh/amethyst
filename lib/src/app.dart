@@ -10,13 +10,23 @@ import 'package:file_picker/file_picker.dart';
 class MyApp extends StatefulWidget {
   final SettingsController settingsController; // Declare the named parameter
 
-  const MyApp({super.key, required this.settingsController}); // Pass the settingsController parameter
+  const MyApp(
+      {super.key,
+      required this.settingsController}); // Pass the settingsController parameter
 
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
+  bool isDarkMode = false;
+
+  void _updateThemeMode() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+  }
+
   Future<void> _pickDirectory(BuildContext context) async {
     if (await _requestPermissions()) {
       String? newDirectory = await FilePicker.platform.getDirectoryPath();
@@ -28,7 +38,6 @@ class _MyAppState extends State<MyApp> {
       Navigator.push(
         context,
         MaterialPageRoute(
-        
           builder: (context) => VaultPage(vault: Vault(path: newDirectory)),
         ),
       );
@@ -47,12 +56,12 @@ class _MyAppState extends State<MyApp> {
     return status.isGranted;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       restorationScopeId: 'app',
       debugShowCheckedModeBanner: false,
+      darkTheme: isDarkMode ? ThemeData.dark() : null,
       localizationsDelegates: const [
         // AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -79,6 +88,12 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () => _pickDirectory(context),
                     child: const Text('Pick Directory'),
                   ),
+                  Switch(
+                    value: isDarkMode,
+                    onChanged: (value) {
+                      _updateThemeMode();
+                    },
+                  )
                 ],
               );
             },
