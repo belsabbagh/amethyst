@@ -25,6 +25,10 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       isDarkMode = !isDarkMode;
     });
+
+    //change theme here
+    widget.settingsController
+        .updateThemeMode(isDarkMode ? ThemeMode.light : ThemeMode.dark);
   }
 
   Future<void> _pickDirectory(BuildContext context) async {
