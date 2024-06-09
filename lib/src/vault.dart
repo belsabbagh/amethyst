@@ -53,6 +53,14 @@ class _VaultPageState extends State<VaultPage> {
       File(fullPath).createSync();
     }
     File(fullPath).writeAsStringSync(text);
+
+    setState(() {
+      _selectedNote = note;
+      _fileNameController.text = path;
+      _noteController.document = Document.fromJson([
+        {'insert': '${note.toString()}\n'}
+      ]);
+    });
   }
 
   void deleteNote(Note note) {

@@ -81,6 +81,11 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Select Folder'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+              onPressed: _updateThemeMode,
+            ),]
         ),
         body: Center(
           child: Builder(
@@ -92,12 +97,6 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () => _pickDirectory(context),
                     child: const Text('Pick Directory'),
                   ),
-                  Switch(
-                    value: isDarkMode,
-                    onChanged: (value) {
-                      _updateThemeMode();
-                    },
-                  )
                 ],
               );
             },
